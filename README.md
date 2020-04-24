@@ -2,6 +2,8 @@
 
 A mapping library for Go.
 
+![Go](https://github.com/theantichris/mapping/workflows/Go/badge.svg)
+
 ## Install
 
 ```sh
