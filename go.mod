@@ -1,3 +1,3 @@
-module github.com/theantichris/go-map
+module github.com/theantichris/mapping
 
 go 1.14
