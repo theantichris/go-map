@@ -3,6 +3,7 @@ package mapping
 import (
 	"errors"
 	"reflect"
+	"sync"
 )
 
 // Errors
@@ -18,6 +19,7 @@ var (
 // Results: []int{2,3,4}
 func ParallelMap(source, transform interface{}, T reflect.Type) (interface{}, error) {
 	sourceValue := reflect.ValueOf(source)
+	transformValue := reflect.ValueOf(transform)
 
 	if err := validate(sourceValue, transform, T); err != nil {
 		return nil, err
@@ -25,7 +27,29 @@ func ParallelMap(source, transform interface{}, T reflect.Type) (interface{}, er
 
 	result := reflect.MakeSlice(reflect.SliceOf(T), sourceValue.Len(), sourceValue.Cap())
 
-	return result, nil
+	wg := &sync.WaitGroup{}
+	wg.Add(sourceValue.Len())
+
+	for i := 0; i < sourceValue.Len(); i++ {
+		go func(index int, entry reflect.Value) {
+			// call transform and store the result
+			transformResults := transformValue.Call([]reflect.Value{entry})
+
+			// store the result in result container
+			resultEntry := result.Index(index)
+			if len(transformResults) > 0 {
+				resultEntry.Set(transformResults[0])
+			} else {
+				resultEntry.Set(reflect.Zero(T))
+			}
+
+			wg.Done()
+		}(i, sourceValue.Index(i))
+	}
+
+	wg.Wait()
+
+	return result.Interface(), nil
 }
 
 func validate(sourceValue reflect.Value, transform interface{}, T reflect.Type) error {
