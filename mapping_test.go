@@ -4,9 +4,10 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 )
 
-func TestParallelMap(t *testing.T) {
+func TestConcurrentMap(t *testing.T) {
 	type args struct {
 		source    interface{}
 		transform interface{}
@@ -65,7 +66,7 @@ func TestParallelMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParallelMap(tt.args.source, tt.args.transform, tt.args.t)
+			got, err := ConcurrentMap(tt.args.source, tt.args.transform, tt.args.t)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("map() error = %v, wantErr %v", err, tt.wantErr)
@@ -76,5 +77,45 @@ func TestParallelMap(t *testing.T) {
 				t.Errorf("map() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func BenchmarkConcurrentMap(b *testing.B) {
+	source := [100]int{}
+
+	for i := 0; i < len(source); i++ {
+		source[i] = i + 1
+	}
+
+	transform := func(num int) int {
+		time.Sleep(20 * time.Millisecond)
+		return num + 1
+	}
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		ConcurrentMap(source, transform, reflect.TypeOf(1))
+	}
+}
+
+func BenchmarkImperative(b *testing.B) {
+	source := [100]int{}
+
+	for i := 0; i < len(source); i++ {
+		source[i] = i + 1
+	}
+
+	transform := func(num int) int {
+		time.Sleep(20 * time.Millisecond)
+		return num + 1
+	}
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		for _, num := range source {
+			transform(num)
+		}
 	}
 }

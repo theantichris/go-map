@@ -14,10 +14,10 @@ var (
 	ErrNilType      = errors.New("map result type cannot be nil")
 )
 
-// ParallelMap an array of something into another thing using a go routine.
+// ConcurrentMap an array of something into another thing using a go routine.
 // Example: Map([]int{1,2,3}, func(num int) int { return num+1 })
 // Results: []int{2,3,4}
-func ParallelMap(source, transform interface{}, T reflect.Type) (interface{}, error) {
+func ConcurrentMap(source, transform interface{}, T reflect.Type) (interface{}, error) {
 	sourceValue := reflect.ValueOf(source)
 	transformValue := reflect.ValueOf(transform)
 
