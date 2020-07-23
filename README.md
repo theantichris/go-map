@@ -10,7 +10,7 @@ A mapping library for Go.
 go get github.com/theantichris/mapping
 ```
 
-## Functions
+## Use
 
 ### ConcurrentMap
 
